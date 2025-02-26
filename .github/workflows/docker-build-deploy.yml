@@ -68,4 +68,20 @@ jobs:
             if [ $(docker ps | grep vue-app | wc -l) -eq 0 ]; then
               echo "部署失败，容器未运行"
               exit 1
-            fi 
+            fi
+
+      - name: 检查 Secret 是否存在
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+            echo "DOCKER_USERNAME 不存在或为空"
+            exit 1
+          else
+            echo "DOCKER_USERNAME 存在"
+          fi
+          
+          if [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+            echo "DOCKER_PASSWORD 不存在或为空"
+            exit 1
+          else
+            echo "DOCKER_PASSWORD 存在"
+          fi 
