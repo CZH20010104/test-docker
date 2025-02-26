@@ -34,6 +34,23 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           logout: true
+
+      - name: 执行部署
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /actual/path/to/your/app
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/vue-app:latest
+            docker-compose down
+            docker-compose up -d
+            # 验证部署是否成功
+            if [ $(docker ps | grep vue-app | wc -l) -eq 0 ]; then
+              echo "部署失败，容器未运行"
+              exit 1
+            fi    
       
       - name: 设置 Docker Buildx
         uses: docker/setup-buildx-action@v3
