@@ -1,0 +1,39 @@
+name: 测试与代码检查
+
+on:
+  push:
+    branches: [ "**" ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: 安装依赖
+        run: npm ci
+      
+      - name: 运行代码检查
+        run: npm run lint
+        
+      - name: 运行类型检查
+        run: npm run type-check
+        continue-on-error: true
+      
+      - name: 运行测试
+        run: npm test
+        continue-on-error: true 
