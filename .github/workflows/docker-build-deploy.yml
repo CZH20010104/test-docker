@@ -31,26 +31,9 @@ jobs:
       - name: 登录 Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
           logout: true
-
-      - name: 执行部署
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /actual/path/to/your/app
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/vue-app:latest
-            docker-compose down
-            docker-compose up -d
-            # 验证部署是否成功
-            if [ $(docker ps | grep vue-app | wc -l) -eq 0 ]; then
-              echo "部署失败，容器未运行"
-              exit 1
-            fi    
       
       - name: 设置 Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -60,9 +43,9 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/vue-app:latest,${{ secrets.DOCKERHUB_USERNAME }}/vue-app:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/vue-app:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/vue-app:buildcache,mode=max
+          tags: ${{ secrets.DOCKER_USERNAME }}/vue-app:latest,${{ secrets.DOCKER_USERNAME }}/vue-app:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/vue-app:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/vue-app:buildcache,mode=max
 
   deploy:
     needs: build
@@ -78,7 +61,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /www/wwwroot/vue-app
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/vue-app:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/vue-app:latest
             docker-compose down
             docker-compose up -d
             # 验证部署是否成功
